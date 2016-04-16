@@ -22,6 +22,11 @@ public class Message {
         data = s.nextLine();
     }
     
+    public Message(int id, String data){
+        this.id = id;
+        this.data = data;
+    }
+    
     public String send(){
         return Integer.toString(id) + " " + data;
     }

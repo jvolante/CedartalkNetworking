@@ -5,6 +5,7 @@
  */
 package edu.cedarville.jvolante.cedartalknetworking;
 
+import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
@@ -76,5 +77,9 @@ public class ChannelReciever extends Thread implements MessageReciever{
     
     public void setupReciever(ReadableByteChannel channel){
         inChannel = channel;
+    }
+    
+    public void close() throws IOException{
+        inChannel.close();
     }
 }

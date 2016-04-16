@@ -88,4 +88,8 @@ public class ChannelSender extends Thread implements MessageSender{
         messages = new LinkedBlockingQueue<>();
     }
     
+    public void close() throws IOException{
+        channel.close();
+    }
+    
 }
