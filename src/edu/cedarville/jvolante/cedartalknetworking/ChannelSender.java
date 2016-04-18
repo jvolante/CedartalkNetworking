@@ -45,12 +45,10 @@ public class ChannelSender extends Thread implements MessageSender{
     
     @Override
     public void sendMessage(Message message) {
-        synchronized(messageLock){
-            try {
-                messages.put(message);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        try {
+            messages.put(message);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -65,6 +63,7 @@ public class ChannelSender extends Thread implements MessageSender{
                 
                     synchronized(messageLock){
                         channel.write(buf.put(sending.send().getBytes()));
+                        buf.clear();
                     }
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
@@ -84,11 +83,12 @@ public class ChannelSender extends Thread implements MessageSender{
     }
     
     public void setupSender(WritableByteChannel outChannel){
+        messages.clear();
         channel = outChannel;
-        messages = new LinkedBlockingQueue<>();
     }
     
     public void close() throws IOException{
+        messages.clear();
         channel.close();
     }
     

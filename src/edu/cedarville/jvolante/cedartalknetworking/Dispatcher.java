@@ -5,9 +5,13 @@
  */
 package edu.cedarville.jvolante.cedartalknetworking;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,10 +21,13 @@ public abstract class Dispatcher extends Thread{
     protected static ChannelSenderFactory senderFactory = new ChannelSenderFactory();
     protected static ChannelRecieverFactory recieverFactory = new ChannelRecieverFactory();
     
-    protected final ChannelSender channelSender;
-    protected final ChannelReciever channelReciever;
+    protected ChannelSender channelSender;
+    protected ChannelReciever channelReciever;
     
     protected boolean isGood = false;
+    
+    protected WritableByteChannel out = null;
+    protected ReadableByteChannel in = null;
     
     public Dispatcher(ChannelSender sender, ChannelReciever reciever){
         channelSender = sender;
@@ -33,13 +40,8 @@ public abstract class Dispatcher extends Thread{
     }
     
     public Dispatcher(ReadableByteChannel in, WritableByteChannel out) throws InvalidConnectionException{
-        if(validateConnection(in, out)){
-            isGood = true;
-            channelSender = senderFactory.getSender(out);
-            channelReciever = recieverFactory.getReciever(in);
-        } else {
-            throw new InvalidConnectionException();
-        }
+        this.in = in;
+        this.out = out;
     }
     
     public boolean isGood(){
@@ -60,9 +62,39 @@ public abstract class Dispatcher extends Thread{
     public void sendMessage(Message m){
         if(isGood()){
             channelSender.sendMessage(m);
+        } else if(out != null){
+            ByteBuffer buf = ByteBuffer.allocate(2048);
+            try{
+                out.write(buf.put(m.send().getBytes()));
+                buf.clear();
+            } catch (IOException ex) {
+                Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    if(out.isOpen()){
+                        out.close();
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
     
+    public void close() throws IOException{
+        channelSender.close();
+        channelReciever.close();
+    }
+    
+    protected void onGoodConnection(){
+        isGood = true;
+        channelSender = senderFactory.getSender(out);
+        channelReciever = recieverFactory.getReciever(in);
+        
+        channelSender.start();
+        channelReciever.start();
+    }
+    
     protected abstract void processIncoming(Message message);
-    protected abstract boolean validateConnection(ReadableByteChannel in, WritableByteChannel out);
+    protected abstract boolean validateConnection();
 }
