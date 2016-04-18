@@ -28,7 +28,7 @@ public class Message {
     }
     
     public String send(){
-        return Integer.toString(id) + " " + data;
+        return Integer.toString(id) + " " + data + "\n";
     }
     
     public int getID(){
