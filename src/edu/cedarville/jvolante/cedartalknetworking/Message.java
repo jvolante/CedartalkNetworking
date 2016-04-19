@@ -19,7 +19,7 @@ public class Message {
         Scanner s = new Scanner(messageString);
         
         id = s.nextInt();
-        data = s.nextLine();
+        data = s.nextLine().trim();
     }
     
     public Message(int id, String data){

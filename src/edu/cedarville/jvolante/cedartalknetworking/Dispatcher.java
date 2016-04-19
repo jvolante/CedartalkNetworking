@@ -68,12 +68,12 @@ public abstract class Dispatcher extends Thread{
                 Channels.newOutputStream(out).write(m.send().getBytes());
             } catch (IOException ex) {
                 Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
+                
                 try {
                     if(out.isOpen()){
                         out.close();
                     }
-                } catch (IOException ex) {
+                } catch (IOException e) {
                     Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
