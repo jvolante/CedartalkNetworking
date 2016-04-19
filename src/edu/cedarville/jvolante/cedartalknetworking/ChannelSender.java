@@ -7,6 +7,7 @@ package edu.cedarville.jvolante.cedartalknetworking;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -54,7 +55,6 @@ public class ChannelSender extends Thread implements MessageSender{
 
     @Override
     public void run() {
-        ByteBuffer buf = ByteBuffer.allocate(2048);
         Message sending = null;
         try{
             while(channel.isOpen()){
@@ -62,8 +62,7 @@ public class ChannelSender extends Thread implements MessageSender{
                     sending = messages.take();
                 
                     synchronized(messageLock){
-                        channel.write(buf.put(sending.send().getBytes()));
-                        buf.clear();
+                        Channels.newOutputStream(channel).write(sending.send().getBytes());
                     }
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
