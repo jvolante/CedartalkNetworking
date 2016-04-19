@@ -6,11 +6,8 @@
 package edu.cedarville.jvolante.cedartalknetworking;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,9 +15,8 @@ import java.util.logging.Logger;
  *
  * @author Jackson
  */
-public class ChannelSender extends Thread implements MessageSender{
+public class ChannelSender implements MessageSender{
     private WritableByteChannel channel;
-    private BlockingQueue<Message> messages;
     private ChannelSenderFactory factory;
     
     private final Object messageLock = new Object();
@@ -46,34 +42,9 @@ public class ChannelSender extends Thread implements MessageSender{
     
     @Override
     public void sendMessage(Message message) {
-        try {
-            messages.put(message);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
-    public void run() {
-        Message sending = null;
-        try{
-            while(channel.isOpen()){
-                try {
-                    sending = messages.take();
-                
-                    Channels.newOutputStream(channel).write(sending.send().getBytes());
-                
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
+        synchronized(messageLock){
             try {
-                if(channel.isOpen()){
-                    channel.close();
-                }
+                Channels.newOutputStream(channel).write(message.send().getBytes());
             } catch (IOException ex) {
                 Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -81,12 +52,10 @@ public class ChannelSender extends Thread implements MessageSender{
     }
     
     public final void setupSender(WritableByteChannel outChannel){
-        messages = new LinkedBlockingQueue<>();
         channel = outChannel;
     }
     
     public void close() throws IOException{
-        messages.clear();
         channel.close();
     }
     
