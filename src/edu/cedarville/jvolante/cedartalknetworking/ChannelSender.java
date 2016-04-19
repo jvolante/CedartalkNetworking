@@ -61,9 +61,8 @@ public class ChannelSender extends Thread implements MessageSender{
                 try {
                     sending = messages.take();
                 
-                    synchronized(messageLock){
-                        Channels.newOutputStream(channel).write(sending.send().getBytes());
-                    }
+                    Channels.newOutputStream(channel).write(sending.send().getBytes());
+                
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
                 }
