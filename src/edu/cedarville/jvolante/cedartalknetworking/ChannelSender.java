@@ -6,6 +6,7 @@
 package edu.cedarville.jvolante.cedartalknetworking;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.util.logging.Level;
@@ -16,7 +17,7 @@ import java.util.logging.Logger;
  * @author Jackson
  */
 public class ChannelSender implements MessageSender{
-    private WritableByteChannel channel;
+    private OutputStream channel;
     private ChannelSenderFactory factory;
     
     private final Object messageLock = new Object();
@@ -25,7 +26,7 @@ public class ChannelSender implements MessageSender{
      * Constructs a new ChannelSender instance.
      * @param outChannel: Channel to send messages on.
      */
-    public ChannelSender(WritableByteChannel outChannel){
+    public ChannelSender(OutputStream outChannel){
         setupSender(outChannel);
         factory = null;
     }
@@ -35,7 +36,7 @@ public class ChannelSender implements MessageSender{
      * @param outChannel: Channel to send messages on.
      * @param fac: Factory this object belongs to.
      */
-    public ChannelSender(WritableByteChannel outChannel, ChannelSenderFactory fac){
+    public ChannelSender(OutputStream outChannel, ChannelSenderFactory fac){
         this(outChannel);
         factory = fac;
     }
@@ -44,14 +45,14 @@ public class ChannelSender implements MessageSender{
     public void sendMessage(Message message) {
         synchronized(messageLock){
             try {
-                Channels.newOutputStream(channel).write(message.send().getBytes());
+                channel.write(message.send().getBytes());
             } catch (IOException ex) {
                 Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
     
-    public final void setupSender(WritableByteChannel outChannel){
+    public final void setupSender(OutputStream outChannel){
         channel = outChannel;
     }
     

@@ -6,6 +6,9 @@
 package edu.cedarville.jvolante.cedartalknetworking;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -27,8 +30,8 @@ public abstract class Dispatcher extends Thread{
     
     protected boolean isGood = false;
     
-    protected WritableByteChannel out = null;
-    protected ReadableByteChannel in = null;
+    protected OutputStream out = null;
+    protected InputStream in = null;
     
     public Dispatcher(ChannelSender sender, ChannelReciever reciever){
         channelSender = sender;
@@ -36,11 +39,11 @@ public abstract class Dispatcher extends Thread{
         isGood = true;
     }
     
-    public Dispatcher(SocketChannel sc) throws InvalidConnectionException{
-        this(sc, sc);
+    public Dispatcher(Socket sc) throws InvalidConnectionException, IOException{
+        this(sc.getInputStream(), sc.getOutputStream());
     }
     
-    public Dispatcher(ReadableByteChannel in, WritableByteChannel out) throws InvalidConnectionException{
+    public Dispatcher(InputStream in, OutputStream out) throws InvalidConnectionException{
         this.in = in;
         this.out = out;
     }
@@ -65,14 +68,12 @@ public abstract class Dispatcher extends Thread{
             channelSender.sendMessage(m);
         } else if(out != null){
             try{
-                Channels.newOutputStream(out).write(m.send().getBytes());
+                out.write(m.send().getBytes());
             } catch (IOException ex) {
                 Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
                 
                 try {
-                    if(out.isOpen()){
-                        out.close();
-                    }
+                    out.close();
                 } catch (IOException e) {
                     Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
                 }

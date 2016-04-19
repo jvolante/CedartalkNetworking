@@ -5,6 +5,7 @@
  */
 package edu.cedarville.jvolante.cedartalknetworking;
 
+import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
 import java.util.Stack;
 
@@ -27,7 +28,7 @@ public class ChannelSenderFactory {
         }
     }
     
-    public ChannelSender getSender(WritableByteChannel outChannel){
+    public ChannelSender getSender(OutputStream outChannel){
         synchronized(availLock){
             if(!availableRecievers.isEmpty()){
                 ChannelSender result = availableRecievers.pop();
