@@ -90,7 +90,6 @@ public abstract class Dispatcher extends Thread{
         channelSender = senderFactory.getSender(out);
         channelReciever = recieverFactory.getReciever(in);
         
-        channelSender.start();
         channelReciever.start();
     }
     
