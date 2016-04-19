@@ -7,6 +7,7 @@ package edu.cedarville.jvolante.cedartalknetworking;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
@@ -63,10 +64,8 @@ public abstract class Dispatcher extends Thread{
         if(isGood()){
             channelSender.sendMessage(m);
         } else if(out != null){
-            ByteBuffer buf = ByteBuffer.allocate(2048);
             try{
-                out.write(buf.put(m.send().getBytes()));
-                buf.clear();
+                Channels.newOutputStream(out).write(m.send().getBytes());
             } catch (IOException ex) {
                 Logger.getLogger(ChannelSender.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
