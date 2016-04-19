@@ -82,8 +82,8 @@ public class ChannelSender extends Thread implements MessageSender{
         }
     }
     
-    public void setupSender(WritableByteChannel outChannel){
-        messages.clear();
+    public final void setupSender(WritableByteChannel outChannel){
+        messages = new LinkedBlockingQueue<>();
         channel = outChannel;
     }
     

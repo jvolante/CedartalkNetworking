@@ -6,6 +6,7 @@
 package edu.cedarville.jvolante.cedartalknetworking;
 
 import java.io.IOException;
+import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
@@ -36,7 +37,7 @@ public class ChannelReciever extends Thread implements MessageReciever{
     
     @Override
     public void run(){
-        Scanner channelReader = new Scanner(inChannel);
+        Scanner channelReader = new Scanner(Channels.newInputStream(inChannel));
         
         while(inChannel.isOpen()){
             String line = channelReader.nextLine();
